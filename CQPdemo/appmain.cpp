@@ -30,9 +30,178 @@ int dying = 0; //表示被狼人选中的即将死亡的玩家
 int ansofwitch = 0;	//表示女巫选择
 int ansofseer = 0;	//表示预言家选择
 int64_t playerqq[15];	//报名参加狼人的玩家QQ
+char playername[15][50];	//报名参加狼人玩家的名字
 
 int64_t uniqueQQgroup;
 int isGroup = 0;	//表示需要向讨论组发送信息还是群发送，0表示向讨论组发送，1表示向群发送
+
+
+//昵称相关结构体
+struct CQ_Type_GroupMember
+{
+	int64_t				GroupID;			// 群号
+	int64_t				QQID;				// QQ号
+	std::string			nick;				// QQ昵称
+	std::string			card;				// 群名片
+	int					sex;				// 性别 0/男 1/女
+	int					age;				// 年龄
+	std::string			area;				// 地区
+	int					jointime;			// 入群时间
+	int					lastsent;			// 上次发言时间
+	std::string			level_name;			// 头衔名字
+	int					permission;			// 权限等级 1/成员 2/管理员 3/群主
+	bool				unfriendly;			// 不良成员记录
+	std::string			title;				// 自定义头衔
+	int					titleExpiretime;	// 头衔过期时间
+	bool				cardcanchange;		// 管理员是否能协助改名
+};
+
+struct CQ_TYPE_QQ
+{
+	int64_t				QQID;				//QQ号
+	std::string			nick;				//昵称
+	int					sex;				//性别
+	int					age;				//年龄
+};
+
+
+
+//解析用户昵称的
+
+static const char reverse_table[128] =
+{
+	64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
+	64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
+	64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 62, 64, 64, 64, 63,
+	52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 64, 64, 64, 64, 64, 64,
+	64, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14,
+	15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 64, 64, 64, 64, 64,
+	64, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40,
+	41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 64, 64, 64, 64, 64
+};
+
+unsigned char *base64_decode(unsigned char *bindata, size_t inlen, unsigned char **out, size_t *outlen)
+{
+	size_t _outlen = *outlen;
+	unsigned char *_out = NULL;
+	int bits_collected = 0;
+	unsigned int accumulator = 0;
+	size_t out_pos = 0;
+
+	if (NULL == *out)
+	{
+		_outlen = inlen;
+		_out = (unsigned char *)malloc(_outlen);
+	}
+	else
+	{
+		_outlen = *outlen;
+		_out = *out;
+	}
+
+	int c = 0;
+	for (int i = 0; i < inlen; i++)
+	{
+		c = bindata[i];
+		if (isspace(c) || c == '=')
+		{
+			// Skip whitespace and padding. Be liberal in what you accept.
+			continue;
+		}
+		if ((c > 127) || (c < 0) || (reverse_table[c] > 63))
+		{
+			return NULL;
+		}
+		accumulator = (accumulator << 6) | reverse_table[c];
+		bits_collected += 6;
+		if (bits_collected >= 8)
+		{
+			bits_collected -= 8;
+			_out[out_pos++] = (char)((accumulator >> bits_collected) & 0xffu);
+		}
+	}
+
+	*outlen = _outlen;
+	*out = _out;
+	return _out;
+}
+
+
+//analysis_nickname
+void analysis_nickname(unsigned char* in, char** out, bool group)	//group = 1表示从QQ群过来的信息；0表示从讨论组
+{
+	size_t _len = 0;
+	unsigned char *outtemp = 0;
+	base64_decode(in, strlen((const char*)in), &outtemp, &_len);
+
+	if (group)
+	{
+		//根据机器人的编码规则，进行读取中文字符
+		unsigned char *infomation = outtemp;
+		infomation += 16;	//得到昵称的长度位置
+		unsigned short nickname_len = (infomation[0] << 8) | infomation[1];	//位运算，将16进制转化为10进制，得到昵称长度
+		infomation += 2;	//得到昵称位置
+		unsigned char *nickname;
+		nickname = (unsigned char *)malloc(sizeof(unsigned char)* nickname_len);
+
+		for (unsigned int i = 0; i < nickname_len; i++)
+		{
+			nickname[i] = infomation[i];
+
+		}
+		nickname[nickname_len] = '\0';	//得到昵称名字
+
+
+
+		infomation = infomation + nickname_len;	//得到群名片的长度位置
+
+		unsigned short groupname_len = (infomation[0] << 8) | infomation[1];	//位运算，将16进制转化为10进制，得到群名片长度
+
+		if (groupname_len != 0)
+		{
+			infomation += 2;	//得到群名片位置
+			unsigned char *groupname;
+			groupname = (unsigned char *)malloc(sizeof(unsigned char)* nickname_len);
+			for (unsigned int i = 0; i < groupname_len; i++)
+			{
+				groupname[i] = infomation[i];
+			}
+
+			groupname[groupname_len] = '\0';	//得到群名片名字
+
+
+			*out = (char*)groupname;
+
+		}
+		else//表示没有设置群名片
+		{
+			*out = (char*)nickname;
+		}
+	}
+
+	else  //从讨论组
+	{
+		//根据机器人的编码规则，进行读取中文字符
+		unsigned char *infomation = outtemp;
+		infomation += 8;	//得到昵称的长度位置
+		unsigned short nickname_len = (infomation[0] << 8) | infomation[1];	//位运算，将16进制转化为10进制，得到昵称长度
+		infomation += 2;	//得到昵称位置
+		unsigned char *nickname;
+		nickname = (unsigned char *)malloc(sizeof(unsigned char)* nickname_len);
+
+		for (unsigned int i = 0; i < nickname_len; i++)
+		{
+			nickname[i] = infomation[i];
+
+		}
+		nickname[nickname_len] = '\0';	//得到昵称名字
+
+
+		*out = (char*)nickname;
+
+	}
+}
+
 
 
 //number of people from 8 to 15
@@ -102,7 +271,6 @@ void welcome_word(int64_t fromGroup)
 		sendmessage(ac, fromGroup, "欢迎开启狼人游戏，我是这次游戏的上帝，小小萌神，请多指教。（感谢我的爸爸FrankShaw让我当上帝）\n请输入“#加入狼人”,来参加这次狼人游戏");
 	
 }
-
 
 
 
@@ -631,7 +799,8 @@ CQEVENT(int32_t, __eventGroupMsg, 36)(int32_t subType, int32_t sendTime, int64_t
 		{
 			int joined = 0;
 			int set = 0;
-			for (int i = 0; i < 15; i++)
+			int i;
+			for (i = 0; i < 15; i++)
 			{
 				if (playerqq[i] == 0)
 					set = i;
@@ -646,21 +815,33 @@ CQEVENT(int32_t, __eventGroupMsg, 36)(int32_t subType, int32_t sendTime, int64_t
 			if (joined)
 			{
 				char buf[50];
-				sprintf(buf, "%lld已经加入了狼人，不能重复加入", fromQQ);
+				sprintf(buf, "%s已经加入了狼人，不能重复加入", playername[i]);
 				sendmessage(ac, fromGroup, buf);
 			}
 			else
 			{
+
+				unsigned char* member = (unsigned char *)CQ_getGroupMemberInfoV2(ac, fromGroup, fromQQ, 1);
+				
+
+				char *nickname;
+
+				nickname = (char *)malloc(sizeof(char)* 50);
+
+				analysis_nickname(member, &nickname, 1);
+
+				strcpy(playername[set], nickname);
 				playerqq[set] = fromQQ;
 				playernum++;
 				char buf[300];
-				sprintf(buf, "%lld加入成功\n当前人数为%d人:\n", fromQQ, playernum);
+				sprintf(buf, "%s加入成功\n当前人数为%d人:\n", nickname, playernum);
 				for (int i = 0; i < 15; i++)
 				if (playerqq[i] != 0)
 				{
-					char qqnum[20];
-					itoa(playerqq[i], qqnum, 10);
-					strcat(buf, qqnum);
+					char buff[15];
+					sprintf(buff, "%d号玩家：", i + 1);
+					strcat(buf, buff);
+					strcat(buf, playername[i]);
 					strcat(buf, "\n");
 				}
 				sendmessage(ac, fromGroup, buf);
@@ -712,11 +893,14 @@ CQEVENT(int32_t, __eventGroupMsg, 36)(int32_t subType, int32_t sendTime, int64_t
 		for (int i = 0; i < 15; i++)
 		if (playerqq[i] != 0)
 		{
-			char qqnum[20];
-			itoa(playerqq[i], qqnum, 10);
-			strcat(buf, qqnum);
+			char buff[15];
+			sprintf(buff, "%d号玩家：", i + 1);
+			strcat(buf, buff);
+			strcat(buf, playername[i]);
 			strcat(buf, "\n");
 		}
+		
+
 		sendmessage(ac, fromGroup, buf);
 	}
 
@@ -770,7 +954,8 @@ CQEVENT(int32_t, __eventDiscussMsg, 32)(int32_t subType, int32_t sendTime, int64
 		{
 			int joined = 0;
 			int set = 0;
-			for (int i = 0; i < 15; i++)
+			int i;
+			for (i = 0; i < 15; i++)
 			{
 				if (playerqq[i] == 0)
 					set = i;
@@ -785,21 +970,33 @@ CQEVENT(int32_t, __eventDiscussMsg, 32)(int32_t subType, int32_t sendTime, int64
 			if (joined)
 			{
 				char buf[50];
-				sprintf(buf, "%lld已经加入了狼人，不能重复加入", fromQQ);
+				sprintf(buf, "%s已经加入了狼人，不能重复加入", playername[i]);
 				sendmessage(ac, fromDiscuss, buf);
 			}
 			else
 			{
+				
+				unsigned char* member = (unsigned char *)CQ_getStrangerInfo(ac, fromQQ, 1);
+
+
+				char *nickname;
+
+				nickname = (char *)malloc(sizeof(char)* 50);
+
+				analysis_nickname(member, &nickname, 0);
+
+				strcpy(playername[set], nickname);
 				playerqq[set] = fromQQ;
 				playernum++;
 				char buf[300];
-				sprintf(buf, "%lld加入成功\n当前人数为%d人:\n", fromQQ, playernum);
+				sprintf(buf, "%s加入成功\n当前人数为%d人:\n", nickname, playernum);
 				for (int i = 0; i < 15; i++)
 				if (playerqq[i] != 0)
 				{
-					char qqnum[20];
-					itoa(playerqq[i], qqnum, 10);
-					strcat(buf, qqnum);
+					char buff[15];
+					sprintf(buff, "%d号玩家：", i + 1);
+					strcat(buf, buff);
+					strcat(buf, playername[i]);
 					strcat(buf, "\n");
 				}
 				sendmessage(ac, fromDiscuss, buf);
@@ -851,11 +1048,14 @@ CQEVENT(int32_t, __eventDiscussMsg, 32)(int32_t subType, int32_t sendTime, int64
 		for (int i = 0; i < 15; i++)
 		if (playerqq[i] != 0)
 		{
-			char qqnum[20];
-			itoa(playerqq[i], qqnum, 10);
-			strcat(buf, qqnum);
+			char buff[15];
+			sprintf(buff, "%d号玩家：", i+1);
+			strcat(buf, buff);
+			strcat(buf, playername[i]);
 			strcat(buf, "\n");
 		}
+
+
 		sendmessage(ac, fromDiscuss, buf);
 	}
 	return EVENT_BLOCK; //关于返回值说明, 见“_eventPrivateMsg”函数
