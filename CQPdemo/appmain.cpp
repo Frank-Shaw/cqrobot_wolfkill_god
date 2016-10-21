@@ -31,6 +31,8 @@ int ansofwitch = 0;	//表示女巫选择
 int ansofseer = 0;	//表示预言家选择
 int64_t playerqq[15];	//报名参加狼人的玩家QQ
 char playername[15][50];	//报名参加狼人玩家的名字
+int64_t start_playerqq;		//发起狼人游戏者QQ
+
 
 int64_t uniqueQQgroup;
 int isGroup = 0;	//表示需要向讨论组发送信息还是群发送，0表示向讨论组发送，1表示向群发送
@@ -247,6 +249,7 @@ void init()
 	day = 1;
 	ansofwitch = 0;
 	ansofseer = 0;
+	start_playerqq = 0;
 	for (int i = 0; i < 15; i++)
 	{
 		player[i] = 0;
@@ -490,11 +493,11 @@ void dealwithdeadpeople(int ans, int dead)
 	if (ans == -1)
 		dying = 0;
 	else if (ans == 0)
-		player[dying] = 0;	//死人身份为0
+		player[dying] = player[dying] * -1;	//死人身份为负数，并且绝对值就是原身份
 	else
 	{
-		player[dying] = 0;
-		player[ans] = 0;
+		player[dying] = player[dying] * -1;
+		player[ans] = player[ans] * -1;
 	}
 
 }
@@ -749,6 +752,24 @@ CQEVENT(int32_t, __eventPrivateMsg, 24)(int32_t subType, int32_t sendTime, int64
 		}
 	}
 
+	else if (start == 6)	//死人可以回复#查看身份来查看所有人的身份
+	{
+		for (int i = 0; i < playernum; i++)
+		{
+			if (playerqq[i] == fromQQ && player[i] < 0 && strcmp(msg, "#查看身份") == 0)	//检查这个人是死人，并且这个人要求查看身份
+			{
+				char buf[1500] = "现在给你看所有玩家身份：\n";
+				for (int j = 0; j < playernum; j++)
+				{
+					char buff[60];
+					sprintf(buff, "%d号玩家：%s，身份：%s\n", j + 1, playername[j], inf[abs(player[j]) - 1]);
+					strcat(buf, buff);
+				}
+				CQ_sendPrivateMsg(ac, fromQQ, buf);
+			}
+		}
+	}
+
 	
 	return EVENT_BLOCK;
 }
@@ -765,6 +786,7 @@ CQEVENT(int32_t, __eventGroupMsg, 36)(int32_t subType, int32_t sendTime, int64_t
 		{
 			if (start == 0)
 			{
+				start_playerqq = fromQQ;
 				isGroup = 1;
 				uniqueQQgroup = fromGroup;
 				wolf_startgame(fromGroup, fromQQ);
@@ -784,8 +806,13 @@ CQEVENT(int32_t, __eventGroupMsg, 36)(int32_t subType, int32_t sendTime, int64_t
 	{
 		if (start != 0)
 		{
-			sendmessage(ac, fromGroup, "结束狼人游戏！");
-			start = 0;
+			if (start_playerqq == fromQQ)
+			{
+				sendmessage(ac, fromGroup, "结束狼人游戏！");
+				start = 0;
+			}
+			else
+				sendmessage(ac, fromGroup, "你不是狼人游戏的发起者，不能结束狼人游戏！");
 		}
 		else
 			sendmessage(ac, fromGroup, "并没有开始狼人游戏！");
@@ -920,6 +947,7 @@ CQEVENT(int32_t, __eventDiscussMsg, 32)(int32_t subType, int32_t sendTime, int64
 		{
 			if (start == 0)
 			{
+				start_playerqq = fromQQ;
 				isGroup = 0;
 				uniqueQQgroup = fromDiscuss;
 				wolf_startgame(fromDiscuss, fromQQ);
@@ -939,8 +967,13 @@ CQEVENT(int32_t, __eventDiscussMsg, 32)(int32_t subType, int32_t sendTime, int64
 	{
 		if (start != 0)
 		{
-			sendmessage(ac, fromDiscuss, "结束狼人游戏！");
-			start = 0;
+			if (start_playerqq == fromQQ)
+			{
+				sendmessage(ac, fromDiscuss, "结束狼人游戏！");
+				start = 0;
+			}
+			else
+				sendmessage(ac, fromDiscuss, "你不是狼人游戏的发起者，不能结束狼人游戏！");
 		}
 		else
 			sendmessage(ac, fromDiscuss, "并没有开始狼人游戏！");
