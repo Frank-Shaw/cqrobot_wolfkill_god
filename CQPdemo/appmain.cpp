@@ -555,14 +555,14 @@ CQEVENT(int32_t, __eventPrivateMsg, 24)(int32_t subType, int32_t sendTime, int64
 					strcat(m, msg);
 					strcat(m, "号玩家，他的身份是...");
 					CQ_sendPrivateMsg(ac, fromQQ, m);
-					if (player[ansofseer] > 1)
+					if (player[ansofseer - 1] > 1)
 					{
 						CQ_sendPrivateMsg(ac, fromQQ, "好人");
 						start = 6;
 						dealwithdeadpeople(ansofwitch, dying);	//处理死人
 						nightover();
 					}
-					else if (player[ansofseer] == 1)
+					else if (player[ansofseer - 1] == 1)
 					{
 						CQ_sendPrivateMsg(ac, fromQQ, "狼人");
 						start = 6;

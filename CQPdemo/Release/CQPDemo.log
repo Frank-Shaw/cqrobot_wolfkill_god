@@ -1,5 +1,5 @@
-﻿生成启动时间为 2016/10/20 19:31:22。
-     1>项目“D:\QQrobot\Development\cqRobot-Wolfkill_God\CQPdemo\CQPDemo.vcxproj”在节点 2 上(Rebuild 个目标)。
+﻿生成启动时间为 2016/10/21 11:45:26。
+     1>项目“D:\QQrobot\Development\cqRobot_Wolfkill_God\CQPdemo\CQPDemo.vcxproj”在节点 2 上(Build 个目标)。
      1>C:\Program Files (x86)\MSBuild\Microsoft.Cpp\v4.0\V120\Microsoft.CppBuild.targets(381,5): warning MSB8028: The intermediate directory (Release\) contains files shared from another project (com.example.democ.vcxproj).  This can lead to incorrect clean and rebuild behavior.
      1>ClCompile:
          C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /Zi /nologo /W3 /WX- /O2 /Oi /Oy- /GL /D WIN32 /D NDEBUG /D _WINDOWS /D _USRDLL /D CQPSDK_EXPORTS /D _WINDLL /D _UNICODE /D UNICODE /Gm- /EHsc /MD /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Yc"stdafx.h" /Fp"Release\com.coxxs.wolf.pch" /Fo"Release\\" /Fd"Release\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt stdafx.cpp
@@ -35,16 +35,16 @@
          C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /Zi /nologo /W3 /WX- /O2 /Oi /Oy- /GL /D WIN32 /D NDEBUG /D _WINDOWS /D _USRDLL /D CQPSDK_EXPORTS /D _WINDLL /D _UNICODE /D UNICODE /Gm- /EHsc /MD /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Release\\" /Fd"Release\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt dllmain.cpp
          dllmain.cpp
        Link:
-         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"D:\QQrobot\Development\cqRobot-Wolfkill_God\Release\com.coxxs.wolf.dll" /INCREMENTAL:NO /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"D:\QQrobot\Development\cqRobot-Wolfkill_God\Release\com.coxxs.wolf.pdb" /SUBSYSTEM:WINDOWS /OPT:REF /OPT:ICF /LTCG /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"D:\QQrobot\Development\cqRobot-Wolfkill_God\Release\com.coxxs.wolf.lib" /MACHINE:X86 /SAFESEH /DLL Release\appmain.obj
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"D:\QQrobot\Development\cqRobot_Wolfkill_God\Release\com.coxxs.wolf.dll" /INCREMENTAL:NO /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"D:\QQrobot\Development\cqRobot_Wolfkill_God\Release\com.coxxs.wolf.pdb" /SUBSYSTEM:WINDOWS /OPT:REF /OPT:ICF /LTCG /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"D:\QQrobot\Development\cqRobot_Wolfkill_God\Release\com.coxxs.wolf.lib" /MACHINE:X86 /SAFESEH /DLL Release\appmain.obj
          Release\dllmain.obj
          Release\stdafx.obj
          CQP.lib
-            正在创建库 D:\QQrobot\Development\cqRobot-Wolfkill_God\Release\com.coxxs.wolf.lib 和对象 D:\QQrobot\Development\cqRobot-Wolfkill_God\Release\com.coxxs.wolf.exp
+            正在创建库 D:\QQrobot\Development\cqRobot_Wolfkill_God\Release\com.coxxs.wolf.lib 和对象 D:\QQrobot\Development\cqRobot_Wolfkill_God\Release\com.coxxs.wolf.exp
          正在生成代码
          已完成代码的生成
-         CQPDemo.vcxproj -> D:\QQrobot\Development\cqRobot-Wolfkill_God\Release\com.coxxs.wolf.dll
-     1>已完成生成项目“D:\QQrobot\Development\cqRobot-Wolfkill_God\CQPdemo\CQPDemo.vcxproj”(Rebuild 个目标)的操作。
+         CQPDemo.vcxproj -> D:\QQrobot\Development\cqRobot_Wolfkill_God\Release\com.coxxs.wolf.dll
+     1>已完成生成项目“D:\QQrobot\Development\cqRobot_Wolfkill_God\CQPdemo\CQPDemo.vcxproj”(Build 个目标)的操作。
 
 生成成功。
 
-已用时间 00:00:02.68
+已用时间 00:00:04.79
